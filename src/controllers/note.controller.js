@@ -1,31 +1,32 @@
 const Note = require("../models/Note")
 
-exports.createNote =(req, res)=>{
-    const note = new Note({
-        userId: req.body.userId,
-        content:req.body.content,
-        characterCount:req.body.content.lenght
-    });
-    note.save((err)=>{
-        if (err) {
-            res.status(500).json({
-                message:err
-            })
-        }
-        res.status(201).json({
-            message: 'Note created successfully'
-        })
-    })
+exports.createNote =async(req, res)=>{
+    const {title, content} = req.body;
+    const note =await Note.create({title, content})
+    res.status(201).json({message: 'Note created', note, user: req.user.userName})
 }
-exports.getNote =(req, res)=>{
-    Note.countDocuments({userId:req.query.userId}, (err, count)=>{
-        if (err) {
-            res.status(500).json({
-                error: err
-            })
-        }
-        res.status(200).json({
-            count
-        })
-    })
-}
+exports.getNotes = async (req, res) => {
+  try {
+    const notes = await Note.find({user:req.user});
+    res.status(200).json(notes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Count total characters in all notes of a user
+exports.getCharacter = async (req, res) => {
+  try {
+    const notes = await Note.find({ userId: req.user._id });
+
+    // Sum all characters from note content
+    const totalCharacters = notes.reduce((sum, note) => {
+      // Assuming your note content is stored in note.content
+      return sum + (note.content ? note.content.length : 0);
+    }, 0);
+
+    res.status(200).json({ totalCharacters });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

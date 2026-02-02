@@ -1,6 +1,10 @@
 const express = require('express');
-const { createNote, getNote } = require('../controllers/note.controller');
+const { createNote, getCharacter, getNotes } = require('../controllers/note.controller');
+const authenticateStudent = require('../middlewares/authStudent.middleware');
 const router = express.Router();
 
-router.post('/notes', createNote)
-router.get('/', getNote)
+
+router.post('/notes',authenticateStudent,createNote)
+router.get('/no', getNotes)
+router.get('/nos', getCharacter)
+module.exports = router

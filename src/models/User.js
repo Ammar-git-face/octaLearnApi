@@ -1,6 +1,5 @@
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
-const { Await } = require("react-router-dom");
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -8,6 +7,10 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
   password: {
+    type: String,
+    required: true,
+  },
+  confirmPassword: {
     type: String,
     required: true,
   },
@@ -24,6 +27,10 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   interest: {
+    type: String,
+    required: true,
+  },
+  institution: {
     type: String,
     required: true,
   },
@@ -45,10 +52,11 @@ const userSchema = new mongoose.Schema({
     enum:["100 level" ,"200 level" ,"300 level","400 level"],
   },
 });
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   const salt = await bcrypt.genSalt();
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+  this.password =await  bcrypt.hash(this.password, salt);
+  // next();
 });
+
 
 module.exports = mongoose.model("User", userSchema);
