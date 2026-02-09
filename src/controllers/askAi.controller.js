@@ -13,7 +13,7 @@ exports.askAi = async (req, res) => {
     res.status(200).json({
       success: true,
       answer
-      
+        
     });
 
   } catch (err) {

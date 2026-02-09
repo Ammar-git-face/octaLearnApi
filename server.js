@@ -1,24 +1,54 @@
-const express = require('express')
-const app = express()
-const cors = require('cors')
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const http = require('http');
+const { Server } = require('socket.io');
+
+const courseRoute = require('./src/routes/course.routes');
+const authRoute = require('./src/routes/auth.routes');
+const noteRoute = require('./src/routes/note.routes');
+const messageRoute = require('./src/routes/message.routes');
+const askAiRoute = require('./src/routes/askAi.routes');
+
+const app = express();
 const port = 4000;
-const courseRoute = require('./src/routes/course.routes')
-const authRoute = require('./src/routes/auth.routes')
-const askAiRoute = require('./src/routes/course.routes')
-const noteRoute = require('./src/routes/note.routes')
-const mongoose = require('mongoose')
-const mongodbUrl = "mongodb://localhost:27017/schoolDb";
-app.use(express.json())
-app.use('/api', courseRoute)
-app.use('/api', authRoute)
-app.use('/api', askAiRoute)
-app.use('/api', noteRoute)
-mongoose.connect(mongodbUrl)
-    .then(() => console.log('database connected'))
-    .catch((error) => console.log(`mongoDb connection ${error}`))
 
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: "*" }
+});
 
+app.use(cors());
+app.use(express.json());
 
-app.listen(port, () => {
-    console.log(`app running on port ${port}`)
-})
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
+
+app.use('/api', courseRoute);
+app.use('/api', authRoute);
+app.use('/api', noteRoute);
+app.use('/api', messageRoute);
+app.use('/api', askAiRoute);
+
+mongoose.connect("mongodb://localhost:27017/schoolDb")
+    .then(() => console.log(" Database connected"))
+    .catch(err => console.log(" Mongo error:", err));
+
+io.on('connection', socket => {
+    console.log('Client connected:', socket.id);
+
+    socket.on("join", userId => {
+        socket.join(userId);
+        console.log(`User ${userId} joined their room`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+server.listen(port, () => {
+    console.log(` Server running on http://localhost:${port}`);
+});

@@ -14,6 +14,7 @@ exports.getNotes = async (req, res) => {
   }
 };
 
+
 // Count total characters in all notes of a user
 exports.getCharacter = async (req, res) => {
   try {

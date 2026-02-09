@@ -36,7 +36,8 @@ exports.login = async (req, res) => {
             // if (auth) {
                 const payload = {
                     email: user.email,
-                    userName: user.userName
+                    userName: user.userName,
+                    _id: user._id
                 }
                 const token = jwt.sign(
                     payload,
