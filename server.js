@@ -9,6 +9,8 @@ const authRoute = require('./src/routes/auth.routes');
 const noteRoute = require('./src/routes/note.routes');
 const messageRoute = require('./src/routes/message.routes');
 const askAiRoute = require('./src/routes/askAi.routes');
+const connectionRoute = require('./src/routes/connection.routes');
+const settingsRoute = require('./src/routes/settings.routes');
 
 const app = express();
 const port = 4000;
@@ -31,6 +33,8 @@ app.use('/api', authRoute);
 app.use('/api', noteRoute);
 app.use('/api', messageRoute);
 app.use('/api', askAiRoute);
+app.use('/api', connectionRoute);
+app.use('/api', settingsRoute);
 
 mongoose.connect("mongodb://localhost:27017/schoolDb")
     .then(() => console.log(" Database connected"))
