@@ -32,7 +32,7 @@ exports.getAllUser = async (req, res) => {
     console.log(error);
   }
 };
-exports.updateUser = async(req, res) => {
+exports.updateUser = async (req, res) => {
   try {
     const user = User.findById(req.params.user_id)
     if (!user) {
@@ -53,3 +53,19 @@ exports.updateUser = async(req, res) => {
     })
   }
 }
+exports.getCharacter = async (req, res) => {
+  try {
+    const name = req.body
+    const user = await User.find({ name })
+    const retrievedName = await user.userName.[0]
+    res.status(200).json({
+      retrievedName
+    })
+  }
+  catch (err) {
+    res.status(400).json({
+      message: err.message
+    })
+  }
+}
+
