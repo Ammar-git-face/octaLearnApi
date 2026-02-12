@@ -20,7 +20,7 @@ exports.signup = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({
-            message: "This Email has already been taken",
+            message: "This Email has  been taken already",
         })
         console.log(error)
     }
@@ -50,7 +50,7 @@ exports.login = async (req, res) => {
                     token
                 });
             }
-            throw Error('Incorrect Password');
+            throw Error('Invalid credentials');
         // }
         res.status(404).json({
             success: false,
