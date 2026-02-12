@@ -52,6 +52,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum:["100 level" ,"200 level" ,"300 level","400 level"],
   },
+  avatar: {
+  type: String,
+  default: "",
+},
+
 });
 userSchema.pre("save", async function () {
   const salt = await bcrypt.genSalt();

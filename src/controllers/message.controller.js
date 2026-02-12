@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Message = require('../models/Message');
 
+
 exports.sendMessage = async (req, res) => {
     try {
         const { recipientId, content } = req.body;
