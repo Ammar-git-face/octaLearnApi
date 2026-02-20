@@ -55,11 +55,14 @@ exports.updateUser = async (req, res) => {
 }
 exports.getCharacter = async (req, res) => {
   try {
-    const name = req.body
-    const user = await User.find({ name })
-    const retrievedName = await user.userName.[0]
+    const name = req.user.userName;
+    const user = await User.findOne({ userName:name})
+
+    const username = user.userName
+    const character = username.charAt().toUpperCase()
     res.status(200).json({
-      retrievedName
+      username,
+      character
     })
   }
   catch (err) {
