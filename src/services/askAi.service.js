@@ -10,7 +10,7 @@ Subject: ${subject}.
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer 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`,
+        Authorization: `Bearer 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`,
         "Content-Type": "application/json",
         "X-Title": "AITutor",
       },
@@ -24,9 +24,11 @@ Subject: ${subject}.
     }
   );
 
-  if (!response.ok) {
-    throw new Error("LLM request failed");
-  }
+if (!response.ok) {
+  const errorText = await response.text();
+  console.log("OpenRouter error:", errorText);
+  throw new Error(errorText);
+}
 
   const data = await response.json();
   return data.choices[0].message.content;

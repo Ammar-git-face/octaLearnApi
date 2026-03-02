@@ -1,17 +1,9 @@
-const isAdmin = (req, res, next)=>{
-    try {
-        if (!req.body) {
-            return res.status(401).json({
-                message:"Unauthorised: No user info"
-            })
-        }
-        if (req.body.role !== 'admin') {
-            return res.status(403).json({message:"Forbidden: You are not allow"})
-       }
-        next()
-    } catch (error) {
-        return res.status(500).json({message: "server error", error: error.message})
-    }
-}
+constadminOnly = (req, res, next) => {
+  if (req.user && req.user.role === "admin") {
+    next();
+  } else {
+    res.status(403).json({ message: "Admin access only" });
+  }
+};
 
 module.exports = isAdmin

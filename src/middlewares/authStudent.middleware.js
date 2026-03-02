@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User"); // make sure path is correct
+const User = require("../models/User");
 
 const JWT_SECRET = "Octalearn";
 

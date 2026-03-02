@@ -5,6 +5,6 @@ const router = express.Router();
 
 
 router.post('/notes',authenticateStudent,createNote)
-router.get('/get-note', getNotes)
+router.get('/get-note', authenticateStudent, getNotes)
 router.get('/get-character', getCharacter)
 module.exports = router

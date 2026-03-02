@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const AskAiSchema = new mongoose.Schema({
     chat: {
-        type: Strings,
+        type: String,
         required: true,
     },
 
