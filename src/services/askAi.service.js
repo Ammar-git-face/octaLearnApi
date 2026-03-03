@@ -10,7 +10,7 @@ Subject: ${subject}.
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer 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`,
+        Authorization: `Bearer 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`,
         "Content-Type": "application/json",
         "X-Title": "AITutor",
       },
