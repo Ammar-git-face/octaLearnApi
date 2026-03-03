@@ -23,10 +23,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  school: {
-    type: String,
-    required: true,
-  },
   interest: {
     type: String,
     required: true,
@@ -56,6 +52,8 @@ const userSchema = new mongoose.Schema({
   type: String,
   default: "",
 },
+ plan: { type: String, default: "free" },
+    role: { type: String, default: "user" }
 
 });
 userSchema.pre("save", async function () {

@@ -10,6 +10,7 @@ const { uploadAvatar } = require("../controllers/settings.controller");
 
 router.post("/avatar", auth, upload.single("avatar"), uploadAvatar);
 router.get("/", auth, getSettings);
-router.put("/", auth, updateSettings);
+router.put("/settings", auth, updateSettings);
 
 module.exports = router;
+

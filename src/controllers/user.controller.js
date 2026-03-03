@@ -6,7 +6,7 @@ exports.getUser = async (req, res) => {
       res.status(200).json({
         success: true,
         message: "User fetched",
-        user,
+        
       });
     } else {
       res.status(404).json({
@@ -25,7 +25,7 @@ exports.getAllUser = async (req, res) => {
       res.status(200).json({
         success: true,
         message: "fetched succcessflly",
-        users,
+        users
       });
     }
   } catch (error) {
