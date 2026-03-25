@@ -57,13 +57,8 @@ exports.login = async (req, res) => {
                     token
                 });
             }
-<<<<<<< HEAD
             throw Error('Invalid credentials');
-        // }
-=======
-            throw Error('Incorrect Password');
         }
->>>>>>> 4feece19e3750df76da52afad14afe050dcc189a
         res.status(404).json({
             success: false,
         })
@@ -73,16 +68,5 @@ exports.login = async (req, res) => {
             mad: error
         })
     }
-<<<<<<< HEAD
-}
-=======
-<<<<<<< HEAD
 
-    
 }
-
-
-=======
-}
->>>>>>> 4feece19e3750df76da52afad14afe050dcc189a
->>>>>>> b699174b148dc7b8c38f98ad353d86dd4f08a559

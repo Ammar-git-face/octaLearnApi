@@ -14,6 +14,8 @@ const askAiRoute = require('./src/routes/askAi.routes');
 const connectionRoute = require('./src/routes/connection.routes');
 const settingsRoute = require('./src/routes/settings.routes');
 const usersRoute = require('./src/routes/user.routes');
+const handoutRoute = require('./src/routes/handout.routes');
+const dashboardRoute = require('./src/routes/dashboard.routes');
 
 const app = express();
 const port = 4000;
