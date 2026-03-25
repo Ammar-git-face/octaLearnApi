@@ -13,7 +13,6 @@ You are an academic tutor.
 Explain clearly, step-by-step.
 Subject: ${subject}.
 `;
-
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {

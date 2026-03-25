@@ -32,7 +32,7 @@ exports.getAllUser = async (req, res) => {
     console.log(error);
   }
 };
-exports.updateUser = async(req, res) => {
+exports.updateUser = async (req, res) => {
   try {
     const user = User.findById(req.params.user_id)
     if (!user) {
@@ -53,3 +53,22 @@ exports.updateUser = async(req, res) => {
     })
   }
 }
+exports.getCharacter = async (req, res) => {
+  try {
+    const name = req.user.userName;
+    const user = await User.findOne({ userName:name})
+
+    const username = user.userName
+    const character = username.charAt().toUpperCase()
+    res.status(200).json({
+      username,
+      character
+    })
+  }
+  catch (err) {
+    res.status(400).json({
+      message: err.message
+    })
+  }
+}
+

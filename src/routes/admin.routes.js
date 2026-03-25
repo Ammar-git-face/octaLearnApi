@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require("express"); 
 const {
   getDashboardStats,
   getAllUsers,
@@ -24,3 +24,4 @@ router.post("/admin/announcement", adminOnly, createAnnouncement);
 router.get("/admin/analytics", adminOnly, getAnalytics);
 
 module.exports = router;
+
