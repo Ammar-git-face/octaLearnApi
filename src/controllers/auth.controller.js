@@ -5,14 +5,14 @@ const JWT_SECRECT = 'Octalearn'
 
 exports.signup = async (req, res) => {
     try {
-        const { email, password, userName, institution, department, course, level, interest, phone, bio, confirmPassword } = req.body;
+        const { email, password, userName, avatar, institution, department, course, level, interest, phone, Bio, confirmPassword } = req.body;
 
         if (!email || !password || !userName) {
             res.status(400).json({
                 message: "email and password required"
             })
         }
-        const user = await User.create({ userName, email, password, institution, department, course, level, interest, phone, bio, confirmPassword })
+        const user = await User.create({ userName, email, password, institution, department, course, level, interest,avatar, phone, Bio, confirmPassword })
         res.status(201).json({
             message: "User created Successfully",
             user

@@ -1,33 +1,37 @@
 const Handout = require("../models/Handout");
+exports.createHandout = async (req, res) => {
+  try {
+    const { title, content, subject, level } = req.body;
 
-exports.createHandout = async(req, res)=>{
-    try{
-        const {title, content, subject, level} = req.body;
+    const fileName = req.file.filename;
 
-        const {file} = req.file.filename
-        if(!title||!content ||subject|| !level|| !file ){
-            res.status(400).json({
-                success: false,
-                message: "All field must be field"
-            })
-
-        }
-        const handout = await Handout.create({title, content, subject, level, file})
-        if(handout){
-            res.status(201).json({
-                success: true,
-                message:"created successfully",
-                handout
-            })
-        }
+    if (!title || !content || !subject || !level || !fileName) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields must be filled",
+      });
     }
-    catch(error){
-        res.status(400).json({
-            success: false,
-            message: error
-        })
-    }
-}
+
+    const handout = await Handout.create({
+      title,
+      content,
+      subject,
+      level,
+      fileName,
+    });
+    res.status(201).json({
+      success: true,
+      message: "Created successfully",
+      handout,
+    });
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 exports.deleteHandout = async (req, res) => {
   try {
     await Handout.findByIdAndDelete(req.params.id);

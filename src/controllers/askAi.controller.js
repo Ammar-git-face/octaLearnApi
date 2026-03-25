@@ -1,6 +1,6 @@
 const askaiService = require("../services/askAi.service");
 const logActivity = require("../utilis/activity.log");
-
+const AskAi = require('../models/AskAi')
 exports.askAi = async (req, res) => {
   try {
      const userId = req.user._id
@@ -14,6 +14,8 @@ exports.askAi = async (req, res) => {
     await logActivity(userId, "AI", "Asked AI a question");
 
     const answer = await askaiService.tutorService(question, subject);
+    await AskAi.create({question, answer, userId})
+    
 
     res.status(200).json({
       success: true,

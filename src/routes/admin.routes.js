@@ -4,20 +4,23 @@ const {
   getAllUsers,
   deleteUser,
   createAnnouncement,
-  getAnalytics
-} = require("../controllers/adminController");
+  getAnalytics,
+  createAdmin
+} = require("../controllers/admin.controller");
 
-const { protect, adminOnly } = require("../middleware/authMiddleware");
-
+const adminOnly = require("../middlewares/authAdmin.middleware");
+// 
 const router = express.Router();
 
-router.use(protect, adminOnly); // Protect ALL admin routes
+// router.use(authenticateStudent, adminOnly); 
 
-router.get("/stats", getDashboardStats);
-router.get("/users", getAllUsers);
-router.delete("/users/:id", deleteUser);
+// Protect ALL admin routes
+router.get("/admin/stats", adminOnly, getDashboardStats);
+router.post("/admin/createAdmin", createAdmin);
+router.get("/admin/users", adminOnly, getAllUsers);
+router.delete("/admin/users/:id", adminOnly, deleteUser);
 
-router.post("/announcement", createAnnouncement);
-router.get("/analytics", getAnalytics);
+router.post("/admin/announcement", adminOnly, createAnnouncement);
+router.get("/admin/analytics", adminOnly, getAnalytics);
 
 module.exports = router;

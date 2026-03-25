@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const Handout = require("../models/Handout");
 const Announcement = require("../models/Announcement");
-
+const Admin = require('../models/Admin')
 exports.getDashboardStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -75,3 +75,30 @@ exports.getAnalytics = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+exports.createAdmin = async (req, res) => {
+  try {
+    const { email, userName, password, role } = req.body;
+
+    if (role === 'user' || !email || !userName || !password || !role) {
+      return res.status(403).json({ message: "Forbidden: You are not allow" })
+    }
+    const admin = await Admin.create({ email, userName, password, role })
+    if (admin) {
+      res.status(201).json({
+        success: true,
+        message: "Admin created successfully",
+        admin
+      })
+    }
+  }
+  catch (err) {
+    console.log(err)
+    res.status(400).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
+exports.adminLogin
+
+//Fam-2024-001

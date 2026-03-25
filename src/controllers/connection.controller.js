@@ -1,16 +1,9 @@
 const Connection = require("../models/Connection");
 
+// SEND REQUEST
 exports.sendRequest = async (req, res) => {
   try {
     const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ message: "User ID required" });
-    }
-
-    if (userId === req.user._id.toString()) {
-      return res.status(400).json({ message: "Cannot connect to yourself" });
-    }
 
     const exists = await Connection.findOne({
       $or: [
@@ -20,88 +13,78 @@ exports.sendRequest = async (req, res) => {
     });
 
     if (exists) {
-      return res.status(400).json({ message: "Request already exists" });
+      return res.status(400).json({ message: "Already exists" });
     }
 
     const connection = await Connection.create({
       requester: req.user._id,
+      requesterName: req.user.userName,
       recipient: userId
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Request sent",
-      connection
+    req.io.to(userId).emit("notification", {
+      type: "request",
+      message: `${req.user.userName} sent you a request`
     });
 
-  } catch (error) {
-    console.log("SEND REQUEST ERROR:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
+    res.json({ success: true, connection });
 
-exports.getRequests = async (req, res) => {
-  try {
-    const requests = await Connection.find({
-      recipient: req.user._id,
-      status: "pending"
-    }).populate("requester", "name department");
-
-    res.json(requests);
-
-  } catch (error) {
-    console.log("GET REQUEST ERROR:", error);
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
 
+// RESPOND REQUEST
 exports.respondRequest = async (req, res) => {
   try {
     const { requestId, action } = req.body;
-
-    if (!["accepted", "rejected"].includes(action)) {
-      return res.status(400).json({ message: "Invalid action" });
-    }
 
     const request = await Connection.findOneAndUpdate(
       { _id: requestId, recipient: req.user._id },
       { status: action },
       { new: true }
-    );
+    ).populate("requester");
 
-    if (!request) {
-      return res.status(404).json({ message: "Request not found" });
-    }
+    req.io.to(request.requester._id.toString()).emit("notification", {
+      type: "connection",
+      message: `${req.user.userName} ${action} your request`
+    });
 
     res.json({ success: true, request });
 
-  } catch (error) {
-    console.log("RESPOND ERROR:", error);
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
+
+// GET REQUESTS
+exports.getRequests = async (req, res) => {
+  const requests = await Connection.find({
+    recipient: req.user._id,
+    status: "pending"
+  }).populate("requester", "userName");
+
+  res.json(requests);
+};
+
+
+// GET CHATS
 exports.getChats = async (req, res) => {
-  try {
-    const connections = await Connection.find({
-      status: "accepted",
-      $or: [
-        { requester: req.user._id },
-        { recipient: req.user._id }
-      ]
-    }).populate("requester recipient", "name department");
+  const connections = await Connection.find({
+    status: "accepted",
+    $or: [
+      { requester: req.user._id },
+      { recipient: req.user._id }
+    ]
+  }).populate("requester recipient", "userName department");
 
-    const users = connections.map((c) =>
-      c.requester._id.toString() === req.user._id.toString()
-        ? c.recipient
-        : c.requester
-    );
+  const users = connections.map(c =>
+    c.requester._id.toString() === req.user._id.toString()
+      ? c.recipient
+      : c.requester
+  );
 
-    res.json(users);
-
-  } catch (error) {
-    console.log("GET CHATS ERROR:", error);
-    res.status(500).json({ error: error.message });
-  }
+  res.json(users);
 };
