@@ -1,25 +1,32 @@
-const express = require("express");
+const express = require("express"); 
 const {
   getDashboardStats,
   getAllUsers,
   deleteUser,
   createAnnouncement,
-  getAnalytics
+  getAnalytics,
+  createAdmin,
+  adminlogin,
+  getAnnouncement
 } = require("../controllers/admin.controller");
-const announcementController = require("../controllers/announcement.controller")
 
-// const { protect, adminOnly } = require("../middleware/authMiddleware");
 
+const adminOnly = require("../middlewares/authAdmin.middleware");
+// 
 const router = express.Router();
 
-// router.use(protect, adminOnly); // Protect ALL admin routes
+// router.use(authenticateStudent, adminOnly); 
 
-router.get("/stats", getDashboardStats);
-router.get("/users", getAllUsers);
-router.delete("/users", deleteUser);
+// Protect ALL admin routes
+router.get("/admin/stats", adminOnly, getDashboardStats);
+router.post("/admin/createAdmin", createAdmin);
+router.post("/admin/adminLogin", adminlogin);
+router.get("/admin/users", adminOnly, getAllUsers);
+router.delete("/admin/users/:id", adminOnly, deleteUser);
 
-router.post("/announcement", createAnnouncement);
-router.get("/announcement-get", announcementController.get_announcement)
-router.get("/analytics", getAnalytics);
+router.post("/admin/announcement", adminOnly, createAnnouncement);
+router.get("/admin/analytics", adminOnly, getAnalytics);
+router.get("/admin/get-announcement", getAnnouncement);
 
-module.exports = router
+module.exports = router;
+

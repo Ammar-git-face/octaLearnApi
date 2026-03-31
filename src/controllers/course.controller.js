@@ -1,5 +1,5 @@
 exports.fetchCourse = async (req, res) => {
-  const { subject } = req.body;
+  const { subject } = req.query;
 
   if (!subject) {
     return res.status(400).json({
@@ -10,9 +10,7 @@ exports.fetchCourse = async (req, res) => {
 
   try {
     const response = await fetch(
-      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(
-        subject
-      )}&format=json`
+      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(subject)}&format=json`
     );
 
     const data = await response.json();

@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
   },
   course: {
     type: String,
+
     required: true,
   },
   Bio: {
@@ -53,7 +54,8 @@ const userSchema = new mongoose.Schema({
   default: "",
 },
  plan: { type: String, default: "free" },
-    role: { type: String, default: "user" }
+    role: { type: String, default: "user" },
+  
 
 });
 userSchema.pre("save", async function () {

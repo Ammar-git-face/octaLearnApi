@@ -14,11 +14,16 @@ const adminSchema =new  mongoose.Schema({
     password:{
         type:String,
         required: true
+    },
+    role:{
+        type:String,
+        default: "admin"
     }
 })
 adminSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(this.password, salt)
-    next()
+    // next()
 })
+
 module.exports = mongoose.model('Admin', adminSchema)

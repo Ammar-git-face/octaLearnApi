@@ -1,0 +1,348 @@
+
+# Naijabus — Technical Research
+
+**Type:** Technical Research (Hackathon Presentation)
+
+**Project:** Naijabus — Modern Intercity Bus Booking & Fleet Management Platform for Nigeria
+
+**Authors / Team:** [Your Team Name]
+
+---
+
+## Abstract
+
+Naijabus is a full-stack platform designed to modernize intercity bus travel in Nigeria. It combines passenger-facing booking (web & mobile), driver/agent apps, and an operator admin dashboard with real-time tracking, dynamic seat allocation, digital payments, and analytics. The platform targets pain points such as inefficient ticketing, long queues, lack of transparency in seat availability and pricing, poor fleet utilization, and unsafe travel information.
+
+This technical research document outlines the problem, proposed solution, system architecture, data model, API surface, security and privacy considerations, deployment and scaling strategies, testing approaches, demo plan for a hackathon, and recommended next steps.
+
+---
+
+## 1. Problem Statement
+
+Intercity bus travel in Nigeria faces several systemic challenges:
+
+- Manual/fragmented ticketing processes with paper tickets or cash-only payments.
+- Unclear seat availability leading to overbooking or underutilization.
+- Long queues and poor customer experience at terminals.
+- Lack of real-time vehicle tracking and ETA information for passengers.
+- Difficulty for operators to manage schedules, drivers, and maintenance.
+- Limited data insights about routes, occupancy, and revenues.
+
+Naijabus aims to address these problems by creating an integrated digital platform that benefits passengers, operators, and drivers.
+
+---
+
+## 2. Target Users & Stakeholders
+
+- **Passengers:** Book seats, receive e-tickets, track buses, and pay online.
+- **Bus Operators / Fleet Managers:** Manage routes, trips, vehicles, drivers; view analytics and revenue.
+- **Terminal Agents / Box Office:** Sell/validate tickets, view passenger lists.
+- **Drivers / Conductors:** Receive assignments, navigate to pickup points, report trip status via driver app.
+- **Payment Processors / Banks:** Handle secure card/mobile payments.
+- **Regulators / Transport Authorities (optional):** Access anonymized data for planning.
+
+---
+
+## 3. Product Goals & Key Features (MVP vs. Future)
+
+### MVP (Hackathon-friendly, core value):
+- Passenger web app (responsive) + simple mobile PWA.
+- Search routes, select seats from a visual seat-map, book and pay (card/USSD/QR).
+- Generate e-ticket (QR code) and email/SMS confirmation.
+- Operator dashboard: create routes, schedule trips, view bookings.
+- Driver app (minimal): receive assigned trip details and update trip status.
+- Basic real-time location tracking using GPS pings (mockable in hackathon).
+- Admin authentication and role-based access control.
+
+### Future / Advanced:
+- Dynamic pricing (surge & discounts), loyalty programs.
+- Route optimization and demand forecasting using ML.
+- Multi-operator marketplace & aggregator model.
+- Offline mode for drivers/agents, cash reconciliation tools.
+- Integration with national ID systems / KYC for higher trust.
+- Full PCI-DSS compliance and audits.
+
+---
+
+## 4. High-level Architecture
+
+**Layers:**
+- Client: Passenger Web (Next.js or React PWA), Driver App (React Native or Ionic), Operator Dashboard (React + shadcn).
+- API: Backend REST/GraphQL microservices (Node.js/Express or Fastify; or NestJS for structure).
+- Data: Relational DB (PostgreSQL) for transactional data; Redis for caching & rate-limiting; Timeseries DB or event store for telemetry (optional).
+- Real-time: WebSocket or Pub/Sub (Socket.io, Pusher, or Ably) for live updates and driver location.
+- Payments: Payment gateway integrations (Flutterwave, Paystack, Stripe where available).
+- Infra: Containerized services (Docker) orchestrated by Kubernetes, CI/CD pipelines, monitoring and logging.
+
+**Component Diagram (textual):**
+- Client Apps <-> API Gateway (JWT auth, rate-limit) -> Backend Services (Auth, Booking, Payments, Fleet, Notifications)
+- Backend -> PostgreSQL (master/replica)
+- Backend -> Redis (session, cache, seat-lock)
+- Backend -> Message Broker (RabbitMQ / Kafka) for background jobs (email, reconciliation)
+- Telemetry: Prometheus + Grafana
+
+---
+
+## 5. Data Model (Core Tables)
+
+Below are suggested core tables (Postgres schema simplified):
+
+- **users**: id, name, email, phone, password_hash, role (passenger, operator, driver, agent), kyc_status, created_at
+- **operators**: id, name, contact_info, country, city, rating
+- **vehicles**: id, operator_id, plate_no, model, capacity, features (AC/WiFi), status
+- **drivers**: id, user_id, operator_id, licence_no, phone
+- **routes**: id, origin, destination, distance_km, expected_duration_min
+- **trips**: id, route_id, vehicle_id, operator_id, departure_time, arrival_time, status (scheduled, boarding, enroute, completed, cancelled)
+- **seats**: id, vehicle_id, seat_no, seat_type
+- **bookings**: id, trip_id, user_id, seat_ids (array), status (booked, paid, cancelled, checked_in), price_total
+- **payments**: id, booking_id, amount, currency, provider, provider_reference, status, paid_at
+- **tickets**: id, booking_id, ticket_code, qr_code_data, issued_at
+- **locations**: id, trip_id, lat, lng, recorded_at (for telemetry)
+- **feedbacks**: id, user_id, trip_id, rating, comment
+
+**Important design note:** Use seat-locking (Redis) to avoid race conditions during concurrent seat selection.
+
+---
+
+## 6. API Design (Representative Endpoints)
+
+**Auth & Users**
+- `POST /api/auth/register` — register user
+- `POST /api/auth/login` — login (returns JWT)
+- `GET /api/users/me` — get current user
+
+**Search & Trips**
+- `GET /api/routes?origin=...&destination=...&date=...` — search available trips
+- `GET /api/trips/:id` — trip detail (seat map + availability)
+
+**Bookings**
+- `POST /api/bookings/hold` — create a provisional hold on selected seats (uses Redis)
+- `POST /api/bookings/confirm` — confirm booking + initiate payment
+- `POST /api/bookings/:id/cancel` — cancel
+- `GET /api/bookings/:id/ticket` — retrieve e-ticket (QR)
+
+**Payments**
+- `POST /api/payments/webhook` — payment provider webhook
+- `GET /api/payments/:id/status` — check payment status
+
+**Operator / Admin**
+- `POST /api/operators/routes` — create route
+- `POST /api/operators/trips` — schedule trip
+- `GET /api/operators/trips/:id/bookings` — view bookings
+- `POST /api/operators/vehicles` — register vehicle
+
+**Driver App**
+- `GET /api/driver/trips` — assigned trips
+- `POST /api/driver/trips/:id/location` — update GPS ping
+- `POST /api/driver/trips/:id/status` — update trip status
+
+**Notifications**
+- `POST /api/notify/sms` — send SMS (via Twilio/MSG91)
+- `POST /api/notify/email` — send email (SendGrid/Mailgun)
+
+---
+
+## 7. UI / UX Considerations
+
+**Passenger app (PWA/web):**
+- Clean search with origin/destination auto-complete.
+- Visual seat map with clear occupied/available indicators.
+- Easy payment flow with fallback to USSD or bank transfer for unbanked users.
+- E-ticket with QR code and offline-readable details.
+- Push notifications and SMS for boarding alerts.
+
+**Operator dashboard:**
+- Route/trip creation forms with schedule templates.
+- Booking list with filters (date, route, status).
+- Revenue dashboard and simple charts for occupancy and trips.
+
+**Driver app:**
+- Minimalist UI: assigned trips, navigation link, ability to mark passenger checked-in, emergency alert.
+- Low-bandwidth mode and offline caching for intermittent connectivity.
+
+Accessibility: ensure forms are keyboard-friendly and color contrasts meet standards.
+
+---
+
+## 8. Concurrency & Consistency (Seat Booking)
+
+Key challenge: concurrent seat selection can cause double-booking.
+
+**Approach:**
+- Use Redis-based seat lock with TTL (e.g., lock for 5–10 minutes while payment completes).
+- On `hold` API, lock seat IDs for a user session; on `confirm`, persist to DB and remove lock; on TTL expiry, release seats.
+- Use DB transactions for final confirmation to ensure atomicity.
+
+Also apply optimistic concurrency control with version numbers for trips or seat maps if needed.
+
+---
+
+## 9. Payments & Reconciliation
+
+- Support multiple payment methods: card (Paystack/Flutterwave/Stripe), bank transfer, USSD, POS at terminal.
+- Implement webhook handlers for payment confirmation from providers.
+- Create daily reconciliation jobs to verify payments vs. bookings, using message queues for eventual consistency.
+- Store provider transaction references and full webhook payloads for audit.
+
+Security: do not store full card data; use hosted checkout or tokenization. Aim for PCI scope minimization.
+
+---
+
+## 10. Security & Privacy
+
+- Use HTTPS for all services; HSTS headers.
+- JWT for stateless auth; refresh tokens stored securely using httpOnly cookies for web or secure storage on mobile.
+- Rate-limiting and IP-based throttling on login and booking endpoints.
+- Input validation and prepared statements to prevent SQL injection.
+- Content Security Policy (CSP) for web clients.
+- Encrypt sensitive data at rest (e.g., PII) and in transit.
+- Secure payment integration; minimize PCI exposure (use payment providers' hosted fields).
+- Role-based access control for operator/admin endpoints.
+- Audit logs for critical operations (cancellations, refunds).
+
+Privacy: conform with local data protection norms; provide privacy policy and data deletion processes.
+
+---
+
+## 11. Observability & Monitoring
+
+- Centralized logging (e.g., ELK stack or hosted alternatives) for backend logs and errors.
+- Metrics: track bookings/sec, payment success rate, API latency, DB connections.
+- Use Prometheus + Grafana for dashboards and Alertmanager for alerts (payment failures, high error rates).
+- Sentry for frontend/back-end error monitoring.
+
+---
+
+## 12. Testing Strategy
+
+- Unit tests for business logic (seat-locking, pricing).
+- Integration tests for API flows (booking -> payment -> ticket issuance), possibly using test doubles for payment providers.
+- End-to-end tests for UI flows using Playwright or Cypress.
+- Load testing for booking endpoints with tools like k6 or Locust to ensure seat-locking scales.
+
+---
+
+## 13. Deployment & DevOps
+
+- Containerize services with Docker.
+- Use managed Postgres (e.g., Supabase, AWS RDS) for reliability.
+- CI/CD pipeline: Run tests and linting on PRs; auto-deploy to staging; manual promotion to production.
+- Use Infrastructure as Code (Terraform) for reproducible infra.
+- Use auto-scaling groups or k8s Horizontal Pod Autoscaler to handle spikes.
+
+---
+
+## 14. Scalability & Cost Considerations
+
+- Start with a monolith API if team size and timeline are small; split into microservices as load increases.
+- Cache hot route/trip data in Redis to reduce DB load.
+- Use background workers for non-critical tasks (email, reporting).
+- Consider CDN for static assets (web app) and WAF for basic security.
+- Cost tradeoffs: managed services reduce ops effort but increase monthly costs; compute and DB are the primary recurring costs.
+
+---
+
+## 15. Hackathon Demo Plan (How to Showcase)
+
+**1. Story-based user flow:** Show end-to-end: passenger searches, selects seats, pays, receives e-ticket; operator sees booking in dashboard; driver app shows assigned trip and location ping.
+
+**2. Live demo elements:**
+- Live seat selection demo using a mocked vehicle with seat map.
+- Simulated GPS pings (or real device) showing live vehicle movement on map.
+- Payment flow using sandbox keys from provider.
+- Admin dashboard showing real-time booking metrics.
+
+**3. Slides & Pitch:**
+- Problem summary, market size (brief, qualitative), demo, architecture, tech stack, what makes Naijabus unique, and roadmap.
+
+**4. Success Metrics to highlight:**
+- Reduced queue time, faster booking completion, improved fleet utilization (hypothetical), payment success rate.
+
+---
+
+## 16. Tech Stack Recommendations (concise)
+
+- Frontend: Next.js (React) for passenger + PWA; TailwindCSS + shadcn for UI components.
+- Mobile: React Native or Ionic for driver app.
+- Backend: Node.js (NestJS or Express/Fastify). Use TypeScript for type safety.
+- Database: PostgreSQL (relational), Redis (cache & seat locks).
+- Real-time: Socket.io or Pusher.
+- Messaging: RabbitMQ or a managed queue.
+- Payments: Paystack / Flutterwave (Nigeria-friendly); Stripe if targeting global expansion.
+- Hosting: Vercel for frontend (or static hosting), DigitalOcean/AWS/GCP for backend, or a managed Kubernetes service.
+
+---
+
+## 17. Risks & Mitigations
+
+- **Risk:** Double booking & race conditions. **Mitigation:** Redis seat-lock, DB transactions, TTLs.
+- **Risk:** Payments failures. **Mitigation:** Retry logic, clear user messaging, alternate payment methods.
+- **Risk:** Driver connectivity issues. **Mitigation:** Offline caching in driver app, store-and-forward telemetry.
+- **Risk:** Regulatory / license issues. **Mitigation:** Engage local operators early and comply with transport rules.
+
+---
+
+## 18. Metrics & KPIs
+
+- Conversion rate (search -> booking completion).
+- Average seat occupancy per trip.
+- Payment success rate.
+- Time from booking to ticket issuance.
+- Average API latency and error rate.
+
+---
+
+## 19. Business Model & Monetization (brief)
+
+- Commission per booking (percentage fee).
+- Subscription or SaaS fees for large operators for premium features.
+- Advertising and partnerships (cargo or third-party service promos).
+- Data analytics services for route optimization (aggregated & anonymized).
+
+---
+
+## 20. Next Steps & Roadmap (practical immediate steps)
+
+1. Build a clickable UI prototype (Figma or implemented PWA) for the passenger flow.
+2. Implement backend booking flow with seat-locking and sandbox payment integration.
+3. Create a minimal operator dashboard to create a route and schedule a trip.
+4. Implement driver app mock that can send location pings.
+5. Prepare demo scripts and test data for hackathon presentation.
+
+---
+
+## 21. Appendix — Example Sequence: Booking Flow
+
+1. Passenger searches for route & date.
+2. System returns available trips and seat maps.
+3. Passenger selects seats and calls `POST /bookings/hold` — system locks selected seats in Redis.
+4. Passenger proceeds to payment; frontend uses hosted checkout from payment provider.
+5. Payment provider calls webhook to `POST /payments/webhook` on success.
+6. Backend confirms booking in DB, generates ticket with QR and sends email/SMS.
+7. Operator dashboard updates and driver sees passenger manifest in their app.
+
+---
+
+## 22. References & Resources
+
+- Payments: Paystack & Flutterwave developer docs.
+- Seat-locking patterns: Redis distributed lock documentation and best practices.
+- Real-time mapping: Google Maps / Mapbox SDKs and cost considerations.
+- Security: OWASP Top Ten, PCI-DSS basics.
+
+(Include actual source links and citations if preparing a formal submission.)
+
+---
+
+**Contact / Questions**
+
+If you'd like, I can:
+- Convert this into a slide deck for a hackathon pitch.
+- Generate API stubs and a Postgres schema SQL file.
+- Provide starter code for frontend and backend templates.
+
+
+---
+
+*End of document.*
+

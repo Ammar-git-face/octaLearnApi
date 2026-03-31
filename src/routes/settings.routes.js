@@ -8,9 +8,8 @@ const {
 const upload = require("../middlewares/upload.middleware");
 const { uploadAvatar } = require("../controllers/settings.controller");
 
-router.post("/avatar", auth, upload.single("avatar"), uploadAvatar);
-router.get("/", auth, getSettings);
+router.patch("/avatar", auth, upload.single("avatar"), uploadAvatar);
+router.get("/get-settings", auth, getSettings);
 router.put("/settings", auth, updateSettings);
 
 module.exports = router;
-

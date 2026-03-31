@@ -5,22 +5,20 @@ const handoutSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    title: {
+    content: {
         type: String,
-        required: true
     },
-
     subject: {
         type: String,
-        enum: ['maths', 'english', 'chemistry', 'biology']
+        enum: ['Mathematics', 'English', 'Chemistry', 'Biology']
     },
     level: {
         type: String,
         enum: ["100 level", "200 level", "300 level", "400 level"],
     },
     fileName: {
-        type:String
-    }
+        type: String
+    },
 
-})
+},{ timestamps: true })
 module.exports = mongoose.model("Handout", handoutSchema)

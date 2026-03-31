@@ -12,10 +12,11 @@ exports.getDashboard = async (req, res) => {
     const userId = req.user._id;
 
 
-    const aiConversations = await askAi.countDocuments({ sender: userId });
+    const aiConversations = await askAi.countDocuments({ userId: userId });
     const totalNotes = await Note.countDocuments({ userId });
     const totalDownloads = await Download.countDocuments({ userId });
     const totalConnections = await Connection.countDocuments({ userId });
+
     const announcement = await Announcement.find()
 
     const activities = await Activity.find({ userId })
@@ -28,7 +29,7 @@ exports.getDashboard = async (req, res) => {
       totalDownloads,
       totalConnections,
       activities,
-      announcementContent: announcement.content
+      announcement
     });
 
   } catch (err) {
