@@ -2,6 +2,10 @@ const User = require("../models/User");
 const Handout = require("../models/Handout");
 const Announcement = require("../models/Announcement");
 const Admin = require('../models/Admin')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const JWT_SECRECT = 'Octalearn'
+
 exports.getDashboardStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -9,13 +13,13 @@ exports.getDashboardStats = async (req, res) => {
       createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     });
     const totalHandouts = await Handout.countDocuments();
-    const proUsers = await User.countDocuments({ plan: "pro" });
+    const proUsers = await User.countDocuments({ plan: "free" });
 
     res.json({
       totalUsers,
       activeUsers,
       totalHandouts,
-      proUsers
+      proUsers  
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -55,6 +59,15 @@ exports.createAnnouncement = async (req, res) => {
   }
 };
 
+exports.getAnnouncement = async (req, res) => {
+  try {
+    const announcements = await Announcement.find().sort({ createdAt: -1 })
+      .limit(5);
+    res.json(announcements);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 exports.getAnalytics = async (req, res) => {
   try {
     const userGrowth = await User.aggregate([
@@ -99,6 +112,51 @@ exports.createAdmin = async (req, res) => {
     })
   }
 }
-exports.adminLogin
+exports.adminlogin = async (req, res) => {
+
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            res.status(400).json({
+                success: false,
+                message: "email and password required"
+            })
+        }
+        const admin = await Admin.findOne({ email: email });
+
+        if (admin) {
+            const auth = await bcrypt.compare(password, admin.password)
+            if (auth) {
+                const payload = {
+                    email: admin.email,
+                    userName: admin.userName,
+                    _id: admin._id,
+                    role:admin.role
+                }
+                const token = jwt.sign(
+                    payload,
+                    JWT_SECRECT,
+                    { expiresIn: "7d" }
+                )
+                res.status(200).json({
+                    message: 'Login Successfully',
+                    admin,
+                    token
+                });
+            }
+            throw Error('Invalid credentials');
+        }
+        res.status(404).json({
+            success: false,
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            mad: error
+        })
+    }
+
+}
+
 
 //Fam-2024-001

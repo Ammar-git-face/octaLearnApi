@@ -16,6 +16,7 @@ const settingsRoute = require('./src/routes/settings.routes');
 const usersRoute = require('./src/routes/user.routes');
 const handoutRoute = require('./src/routes/handout.routes');
 const dashboardRoute = require('./src/routes/dashboard.routes');
+const adminRoute = require('./src/routes/admin.routes');
 
 const app = express();
 const port = 4000;
@@ -25,6 +26,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" }
 });
+
 
 app.use(cors());
 app.use(express.json());
@@ -49,6 +51,7 @@ app.use('/api', settingsRoute);
 app.use('/api', handoutRoute);
 app.use('/api', dashboardRoute);
 app.use('/api', usersRoute);
+app.use('/api', adminRoute);
 
 // DB
 mongoose.connect("mongodb://localhost:27017/schoolDb")

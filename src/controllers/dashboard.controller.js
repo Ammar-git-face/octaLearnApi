@@ -29,7 +29,7 @@ exports.getDashboard = async (req, res) => {
       totalDownloads,
       totalConnections,
       activities,
-      announcementContent: announcement.content
+      announcement
     });
 
   } catch (err) {

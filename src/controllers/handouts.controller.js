@@ -42,9 +42,74 @@ exports.deleteHandout = async (req, res) => {
 };
 exports.getHandouts = async (req, res) => {
   try {
-    const handouts = await Handout.find().sort({ createdAt: -1 });
+    const handouts = await Handout.find();
     res.json(handouts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.fetchHandoutByLevel = async (req, res) => {
+  try {
+    const  level  = req.params.level
+    if (!level) {
+      res.status(400).json({
+        message: "select to fetch"
+      })
+    }
+    const handout = await Handout.findOne({ level: level})
+    res.status(200).json({
+      // success: true,
+      // message: 'Find successfully',
+      handout
+    })
+  }
+  catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
+exports.fetchHandoutBySubject = async (req, res) => {
+  try {
+    const subject  = req.params.subject
+    if (!subject) {
+      res.status(400).json({
+        message: "select to fetch"
+      })
+    }
+    const handout = await Handout.findOne({ subject: subject})
+    res.status(200).json({
+      handout
+    })
+  }
+  catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    })
+  }
+}
+exports.searchHandout = async (req, res) => {
+  try {
+    const { title } = req.body
+    if (!title) {
+      res.status(400).json({
+        message: "select to fetch"
+      })
+    }
+    const handout = await Handout.findOne({ title: title})
+    res.status(200).json({
+      success: true,
+      message: 'Find successfully',
+      handout: handout
+    })
+  }
+  catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    })
+  }
+}

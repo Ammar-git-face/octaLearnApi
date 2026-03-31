@@ -5,8 +5,11 @@ const {
   deleteUser,
   createAnnouncement,
   getAnalytics,
-  createAdmin
+  createAdmin,
+  adminlogin,
+  getAnnouncement
 } = require("../controllers/admin.controller");
+
 
 const adminOnly = require("../middlewares/authAdmin.middleware");
 // 
@@ -17,11 +20,13 @@ const router = express.Router();
 // Protect ALL admin routes
 router.get("/admin/stats", adminOnly, getDashboardStats);
 router.post("/admin/createAdmin", createAdmin);
+router.post("/admin/adminLogin", adminlogin);
 router.get("/admin/users", adminOnly, getAllUsers);
 router.delete("/admin/users/:id", adminOnly, deleteUser);
 
 router.post("/admin/announcement", adminOnly, createAnnouncement);
 router.get("/admin/analytics", adminOnly, getAnalytics);
+router.get("/admin/get-announcement", getAnnouncement);
 
 module.exports = router;
 
