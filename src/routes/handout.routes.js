@@ -13,6 +13,7 @@ router.post(
     handout.createHandout
 );
 router.get('/admin/get-handout', handout.getHandouts)
+router.get("/download/:id", handout.downloadHandout);
 router.get('/admin/find-handout-by-level/:level', handout.fetchHandoutByLevel)
 router.get('/admin/find-handout-by-subject/:subject', handout.fetchHandoutBySubject)
 router.get('/admin/find-handout-by-title', handout.searchHandout)

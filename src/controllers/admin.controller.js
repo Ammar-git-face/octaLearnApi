@@ -19,7 +19,7 @@ exports.getDashboardStats = async (req, res) => {
       totalUsers,
       activeUsers,
       totalHandouts,
-      proUsers  
+      proUsers
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -36,6 +36,7 @@ exports.getAllUsers = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
+  console.log('deleted')
   try {
     await User.findByIdAndDelete(req.params.id);
     res.json({ message: "User removed" });
@@ -45,6 +46,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 exports.createAnnouncement = async (req, res) => {
+  // console.log(req.body)
   try {
     const { title, content } = req.body;
 
@@ -112,50 +114,61 @@ exports.createAdmin = async (req, res) => {
     })
   }
 }
+// The bug: after res.status(200).json(...) there's no return,
+// so it falls through and throws "Invalid credentials" anyway
+// then the catch sends a 500 over an already-sent response → crash
+
 exports.adminlogin = async (req, res) => {
+  console.log('visited')
+  try {
+    const { email, password } = req.body;
 
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            res.status(400).json({
-                success: false,
-                message: "email and password required"
-            })
-        }
-        const admin = await Admin.findOne({ email: email });
-
-        if (admin) {
-            const auth = await bcrypt.compare(password, admin.password)
-            if (auth) {
-                const payload = {
-                    email: admin.email,
-                    userName: admin.userName,
-                    _id: admin._id,
-                    role:admin.role
-                }
-                const token = jwt.sign(
-                    payload,
-                    JWT_SECRECT,
-                    { expiresIn: "7d" }
-                )
-                res.status(200).json({
-                    message: 'Login Successfully',
-                    admin,
-                    token
-                });
-            }
-            throw Error('Invalid credentials');
-        }
-        res.status(404).json({
-            success: false,
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            mad: error
-        })
+    if (!email || !password) {
+      return res.status(400).json({  // ✅ return
+        success: false,
+        message: "email and password required"
+      })
     }
 
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {                       // ✅ flip the logic — guard clause
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found"
+      })
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      {
+        email: admin.email,
+        userName: admin.userName,
+        _id: admin._id,
+        role: admin.role
+      },
+      JWT_SECRECT,
+      { expiresIn: "7d" }
+    )
+
+    return res.status(200).json({
+      message: 'Login Successfully',
+      admin,
+      token
+    });
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
 }
 
 

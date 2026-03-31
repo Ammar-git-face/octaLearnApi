@@ -68,5 +68,4 @@ exports.login = async (req, res) => {
             mad: error
         })
     }
-
 }

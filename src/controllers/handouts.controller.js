@@ -1,4 +1,7 @@
 const Handout = require("../models/Handout");
+const path = require("path");
+const fs = require("fs");
+
 exports.createHandout = async (req, res) => {
   try {
     const { title, content, subject, level } = req.body;
@@ -49,6 +52,49 @@ exports.getHandouts = async (req, res) => {
   }
 };
 
+exports.downloadHandout = async (req, res) => {
+  try {
+    const handout = await Handout.findById(req.params.id);
+
+    if (!handout) {
+      return res.status(404).json({
+        success: false,
+        message: "Handout not found",
+      });
+    }
+
+    const filePath = path.join(__dirname, "../uploads", handout.fileName);
+
+    // Confirm the file actually exists on disk before attempting download
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found on server",
+      });
+    }
+
+    // Force browser to download instead of previewing
+    res.setHeader("Content-Disposition", `attachment; filename="${handout.fileName}"`);
+    res.setHeader("Content-Type", "application/pdf");
+
+    const fileStream = fs.createReadStream(filePath);
+
+    fileStream.on("error", (err) => {
+      return res.status(500).json({
+        success: false,
+        message: "Error reading file: " + err.message,
+      });
+    });
+
+    fileStream.pipe(res);
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 exports.fetchHandoutByLevel = async (req, res) => {
   try {
     const  level  = req.params.level

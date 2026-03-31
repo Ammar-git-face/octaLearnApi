@@ -7,6 +7,7 @@ const { Server } = require('socket.io');
 const path = require("path");
 
 const courseRoute = require('./src/routes/course.routes');
+const adminRoute   = require('./src/routes/admin.routes')
 const authRoute = require('./src/routes/auth.routes');
 const noteRoute = require('./src/routes/note.routes');
 const messageRoute = require('./src/routes/message.routes');
@@ -16,7 +17,7 @@ const settingsRoute = require('./src/routes/settings.routes');
 const usersRoute = require('./src/routes/user.routes');
 const handoutRoute = require('./src/routes/handout.routes');
 const dashboardRoute = require('./src/routes/dashboard.routes');
-const adminRoute = require('./src/routes/admin.routes');
+//const adminRoute = require('./src/routes/admin.routes');
 
 const app = express();
 const port = 4000;
@@ -54,7 +55,7 @@ app.use('/api', usersRoute);
 app.use('/api', adminRoute);
 
 // DB
-mongoose.connect("mongodb://localhost:27017/schoolDb")
+mongoose.connect("mongodb://localhost:27017/jwt")
   .then(() => console.log(" Database connected"))
   .catch(err => console.log(" Mongo error:", err));
 
