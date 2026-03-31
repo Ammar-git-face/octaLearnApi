@@ -31,7 +31,8 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-exports.deleteUser = async (req, res) => {
+exports.deleteUser = async (req, res) => { 
+  console.log('deleted')
   try {
     await User.findByIdAndDelete(req.params.id);
     res.json({ message: "User removed" });
@@ -41,6 +42,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 exports.createAnnouncement = async (req, res) => {
+  // console.log(req.body)
   try {
     const { title, content } = req.body;
 

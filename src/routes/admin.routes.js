@@ -1,31 +1,25 @@
 const express = require("express");
-<<<<<<< HEAD
-const router = express.Router();
-const { admin } = require("../controllers/admin.controllers")
-
-router.post("/admin" , admin);
- 
-=======
 const {
   getDashboardStats,
   getAllUsers,
   deleteUser,
   createAnnouncement,
   getAnalytics
-} = require("../controllers/adminController");
+} = require("../controllers/admin.controller");
+const announcementController = require("../controllers/announcement.controller")
 
-const { protect, adminOnly } = require("../middleware/authMiddleware");
+// const { protect, adminOnly } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.use(protect, adminOnly); // Protect ALL admin routes
+// router.use(protect, adminOnly); // Protect ALL admin routes
 
 router.get("/stats", getDashboardStats);
 router.get("/users", getAllUsers);
-router.delete("/users/:id", deleteUser);
+router.delete("/users", deleteUser);
 
 router.post("/announcement", createAnnouncement);
+router.get("/announcement-get", announcementController.get_announcement)
 router.get("/analytics", getAnalytics);
 
->>>>>>> 4feece19e3750df76da52afad14afe050dcc189a
-module.exports = router;
+module.exports = router

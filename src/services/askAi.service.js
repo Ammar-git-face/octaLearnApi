@@ -24,11 +24,11 @@ Subject: ${subject}.
     }
   );
 
-if (!response.ok) {
-  const errorText = await response.text();
-  console.log("OpenRouter error:", errorText);
-  throw new Error(errorText);
-}
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.log("OpenRouter error:", errorText);
+    throw new Error(errorText);
+  }
 
   const data = await response.json();
   return data.choices[0].message.content;
