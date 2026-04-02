@@ -5,9 +5,8 @@ const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require("path");
-
 const courseRoute = require('./src/routes/course.routes');
-const adminRoute   = require('./src/routes/admin.routes')
+const adminRoute = require('./src/routes/admin.routes')
 const authRoute = require('./src/routes/auth.routes');
 const noteRoute = require('./src/routes/note.routes');
 const messageRoute = require('./src/routes/message.routes');
@@ -41,6 +40,7 @@ app.use((req, res, next) => {
   next();
 });
 
+
 // routes
 app.use('/api', courseRoute);
 app.use('/api', authRoute);
@@ -53,12 +53,19 @@ app.use('/api', handoutRoute);
 app.use('/api', dashboardRoute);
 app.use('/api', usersRoute);
 app.use('/api', adminRoute);
-
+const localDb = 'mongodb://localhost:27017/schoolDb'
 // DB
-mongoose.connect("mongodb://localhost:27017/jwt")
-  .then(() => console.log(" Database connected"))
-  .catch(err => console.log(" Mongo error:", err));
+const connectDB = async () => {
+  await mongoose.connect(process.env.MONGO_URI).then(() => {
+    console.log('\nMongoDB Connected');
+  }).catch((err) => {
+    console.log('\nMongoDB Connection Failed: ', err);
+    process.exit(1);
+  })
+};
 
+
+connectDB()
 io.on('connection', socket => {
   console.log(' Client connected:', socket.id);
 
@@ -71,6 +78,7 @@ io.on('connection', socket => {
     console.log(' Client disconnected:', socket.id);
   });
 });
+
 
 server.listen(port, () => {
   console.log(` Server running on http://localhost:${port}`);
