@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require("path");
-const MONGODB_URI = process.env.MONGO_URI
+const MONGODB_URI = process.env.MONGO_URL
 const courseRoute = require('./src/routes/course.routes');
 const adminRoute = require('./src/routes/admin.routes')
 const authRoute = require('./src/routes/auth.routes');
@@ -54,10 +54,10 @@ app.use('/api', handoutRoute);
 app.use('/api', dashboardRoute);
 app.use('/api', usersRoute);
 app.use('/api', adminRoute);
-const localDb = 'mongodb://localhost:27017/schoolDb'
+const localDb = "mongodb://localhost:27017/octa"
 // DB
 const connectDB = async () => {
-  await mongoose.connect(process.env.MONGO_URI)
+  await mongoose.connect(process.env.MONGO_URL)
     .then(() => console.log(" Database connected"))
     .catch(err => console.log(" Mongo error:", err));
 }
