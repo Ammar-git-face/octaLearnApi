@@ -3,23 +3,24 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const Admin = require("../src/models/Admin"); // adjust path to your Admin model
 
-const MONGO_URI = "mongodb://localhost:27017/schoolDb";
+const MONGO_URI = process.env.MONGO_URL || "mongodb://localhost:27017/schoolDb";
 
 const seedAdmin = async () => {
     await mongoose.connect(MONGO_URI);
 
-    const existing = await Admin.findOne({ email: "amarhussaini72@gmail.com" });
-    if (existing) {
-        console.log("Admin already exists");
-        process.exit(0);
-    }
+    const email = "amarhussaini72@gmail.com";
+    const password = "OctaLearn/#/123";
 
-    const hashedPassword = await bcrypt.hash("OctaLearn/#/123", 10);
+    const existing = await Admin.findOne({ email });
+    if (existing) {
+        await Admin.deleteOne({ _id: existing._id });
+        console.log("Existing admin record removed and will be recreated");
+    }
 
     await Admin.create({
         userName: "OctaAdmin",
-        email: "amarhussaini72@gmail.com",
-        password: hashedPassword,
+        email,
+        password,
         role: "admin"
     });
 

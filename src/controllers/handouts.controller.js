@@ -105,8 +105,8 @@ exports.fetchHandoutByLevel = async (req, res) => {
     }
     const handout = await Handout.findOne({ level: level})
     res.status(200).json({
-      // success: true,
-      // message: 'Find successfully',
+      success: true,
+      message: 'Find successfully',
       handout
     })
   }

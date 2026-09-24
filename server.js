@@ -54,7 +54,7 @@ app.use('/api', handoutRoute);
 app.use('/api', dashboardRoute);
 app.use('/api', usersRoute);
 app.use('/api', adminRoute);
-const localDb = "mongodb://localhost:27017/octa"
+// const localDb = "mongodb://localhost:27017/"
 // DB
 const connectDB = async () => {
   await mongoose.connect(process.env.MONGO_URL)
